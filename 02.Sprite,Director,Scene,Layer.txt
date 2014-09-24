@@ -1,0 +1,67 @@
+//Sprite介绍
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+  
+    if ( !Layer::init() )
+    {
+        return false;
+    }
+	//初始化Sprite对象（精灵对象）
+	Sprite *s = Sprite::create("alan.jpg");
+	//设置锚点为图片的中心
+	s->setAnchorPoint(Point(0.5,0.5));
+	设置锚点的坐标为（0，0）点
+	s->setPosition(Point(0,0));
+	将Sprite添加到屏幕
+	this->addChild(s);
+
+    
+    return true;
+}
+
+
+//director介绍
+AppDelegate.cpp
+bool AppDelegate::applicationDidFinishLanching()
+{
+	auto director = Director::getInstance();
+	//**********
+	//①通过导演，启动一个场景Scene
+	director->runWithScene(scene);
+}
+
+HelloWorldScene.cpp
+Scene* HelloWorld::createScene()
+{
+	//***********
+	auto layer = HelloWorld::create();
+
+    //②在场景里添加一个层Layer
+    scene->addChild(layer);
+}
+
+bool HelloWorld::init()
+{
+	//************
+	//③层里面添加游戏元素
+	this->addChild(s);
+}
+
+
+//Scene,Layer介绍
+AppDelegate.cpp
+bool AppDelegate::applicationDidFinishLanching()
+{	
+	//***************
+	//下面这行创建一个场景，我们这里注释掉，重写一个
+	//auto scene = HelloWorld::createScene();
+	Scene *secne = Scene::create();
+	Layer *layer = Layer::create();
+	scene->addChild(layer);
+	
+	Sprite *s = Sprite::create("alan.jpg");
+	s->setAnchorPonit(Point(0.5,0.5));
+	s->setPosition(Point(0,0));
+	layer->addChild(s);
+}
