@@ -1,0 +1,77 @@
+//log使用
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+	//*************
+	//使用log可以输出日志文件，在调试的debug窗口可以找到
+	log("Yooooooo,%d",200);
+}
+
+
+//MessageBox的使用
+HelloWorldScene.cpp
+void HelloWorld::menuCloseCallback(Ref* pSender)
+{
+	#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+		//如果检测到是WP8那么执行MessageBox，显示你执行了关闭按钮
+		MessageBox("You pressed the close button. Windows Store Apps do not implement a close button.","Alert");
+    return;
+	#endif
+	//************
+}
+
+
+//LabelTTF的使用
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+	//************
+	//获取屏幕可用大小
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	//创建文本标签
+	LabelTTF *label = LabelTTF::create();
+	//文本
+	label->setString("Yooooo,DHR!");
+	//字体大小
+	label->setFontSize(36);
+	//文字颜色
+	label->setColor(Color3B(255,0,0));
+	//位置
+	label->setPosition(Point( visibleSize.width/2, visibleSize.height/2));
+	//输出到屏幕
+	this->addChild(label);
+}
+
+
+//TextFieldTTF
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+	//**********
+	//创建输入文本，无法使用中文
+	TextFieldTTF *tf = TextFieldTTF::textFieldWithPlaceHolder("Please input here","Times New Roman",24);
+		//设置显示位置
+		tf->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+		//添加到屏幕
+		this->addChild(tf);
+		//创建监听器
+		auto listener = EventListenerTouchOneByOne::create();
+		//监听开始等于闭包函数，参数是touch对象（判断接触）和event对象，[]里面获得外部变量
+		listener->onTouchBegan = [tf](Touch *t,Event *e){
+			//判断文本范围
+			if(tf->getBoundingBox().containsPoint(t->getLocation())){
+				//使用log进行测试
+				//log("<<<");
+				//打开键盘并接收输入
+				tf->attachWithIME();
+			}else{
+				//输入结束并关闭键盘
+				tf->detachWithIME();
+			}
+				
+			return false;
+		};
+		//获得事件派发器，参数是监听器和目标
+		Director::getInstance()->getEventDispatcher()->
+			addEventListenerWithSceneGraphPriority(listener,tf);
+}
