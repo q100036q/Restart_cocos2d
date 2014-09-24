@@ -1,0 +1,75 @@
+HelloWorldScene.cpp
+#include "ImageScene.h"
+bool HelloWorld::init()
+{
+//设置文本标签，这里应该使用TextFieldTTF,而不是LabelTTF,否则成功也不会跳转
+		TextFieldTTF *label = TextFieldTTF::textFieldWithPlaceHolder("Please input here","Times New Roman",24);
+		addChild(label);
+		label->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+		/*设置变幻的图片
+		Sprite *bg = Sprite::create("alan1.jpg");
+		bg->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+		addChild(bg);*/
+		//设置监听器
+		auto *listener = EventListenerTouchOneByOne::create();
+		listener->onTouchBegan = [label](Touch *t,Event *e ){
+			if(label->getBoundingBox().containsPoint(t->getLocation()))
+			{
+				//测试用
+				//log("<<<<<<<<<<");
+				//跳转
+				Director::getInstance()->replaceScene(ImageScene::createScene());
+				//场景切换效果，TransitionScene下有各种效果
+				//Director::getInstance()->replaceScene(TransitionFadeBL::create(3,ImageScene::createScene()));
+				
+			}
+			return false;
+		};
+
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,label);
+		
+}
+
+ImageScene.h
+#ifndef _ImageScene_
+#define _ImageScene_
+
+#include <iostream>
+#include "cocos2d.h"
+
+USING_NS_CC;
+//写一个图片场景继承自层
+class ImageScene:public Layer
+{
+public:
+	//初始化
+	virtual bool init();
+	//创建场景的操作
+	static Scene* createScene();
+	//创建的方法
+	CREATE_FUNC(ImageScene);
+};
+
+#endif
+
+ImageScene.cpp
+#include "ImageScene.h"
+
+Scene* ImageScene::createScene(){
+    //创建场景--创建层--将场景添加到层
+    Scene* scene = Scene::create();
+    ImageScene * layer = ImageScene::create();
+    scene->addChild(layer);
+    
+    return scene;
+}
+
+
+bool ImageScene::init()
+{
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Sprite *s = Sprite::create("alan.jpg");
+	s->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+	addChild(s);
+	return true;
+}
