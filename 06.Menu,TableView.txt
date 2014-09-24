@@ -1,0 +1,83 @@
+//Menu的使用
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//**************
+//使用Menu的创建方法，四个参数分别是，点击前，点击后，回调消息
+auto menu = Menu::create(MenuItemImage::create("alan.jpg",
+			"alan1.jpg",[](Object* obj){
+			log("menu item touch1");
+		}),NULL);
+		addChild(menu);
+}
+
+//TableView的使用
+HelloWorldScene.h
+#include <cocos-ext.h>
+USING_NS_CC;
+USING_NS_CC_EXT;
+class HelloWorld : public cocos2d::Layer,TableViewDataSource,TableViewDelegate
+{
+//**********
+public:	
+	//View列表项的大小（宽高）
+    virtual Size cellSizeForTable(TableView *table);
+    //创建指定位置的列表项
+    virtual TableViewCell* tableCellAtIndex(TableView *table, ssize_t idx);
+    //列表中一共有多少个列表项
+    virtual ssize_t numberOfCellsInTableView(TableView *table);
+	virtual void scrollViewDidScroll(ScrollView* view){}
+	virtual void scrollViewDidZoom(ScrollView* view){}
+	//列表项被点击
+    virtual void tableCellTouched(TableView* table, TableViewCell* cell) ;
+}
+
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+	//**************
+	TableView *tv = TableView::create(this,Size(300,300));
+	tv->setAnchorPoint(Point(0,0));
+	tv->setPosition(100,0);
+	//设置一个监听
+	tv->setDelegate(this);
+	this->addChild(tv);
+}
+
+Size HelloWorld::cellSizeForTable(TableView *table){
+	return Size(300,50);
+}
+TableViewCell* HelloWorld::tableCellAtIndex(TableView *table, ssize_t idx){
+	//获取到tablecell
+	TableViewCell *cell = table->dequeueCell();
+	//用一个文本显示
+	LabelTTF *label;
+	//这个列表项向上拖动的时候，超出范围出去的值会被回收到队列，如果有新的出来，查看队列，有回收的就取出，没有的话就自己创建
+	//若没有
+	if(cell==NULL)
+	{
+		cell = TableViewCell::create();
+		label = LabelTTF::create();
+	//设计一个标签
+		label->setTag(2);
+		label->setAnchorPoint(Point(0,0));
+		label->setFontSize(30);
+		cell->addChild(label);
+	}else{
+	//如果有
+		label = (LabelTTF*)cell->getChildByTag(2);
+	}
+	//配置label里的数据，cocos2d自带的字符工具，idx可以不用强制转换，前提是前面的是%ld
+	label->setString(StringUtils::format("Label %d",(int)idx));
+	return cell;
+}
+ssize_t HelloWorld::numberOfCellsInTableView(TableView *table){
+	return 100;
+}
+void HelloWorld::tableCellTouched(TableView* table, TableViewCell* cell) {
+	//用label获取标志位的文本
+	LabelTTF *label = (LabelTTF*)cell->getChildByTag(2);
+	log("%s",label->getString().c_str());
+}
+无法打开包括文件:“extensions/ExtensionMacros.h”解决方法
+http://my.oschina.net/JeremyOuyang/blog/266019
