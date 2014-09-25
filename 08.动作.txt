@@ -1,0 +1,42 @@
+//动作,动作反转,动作重复
+HelloWorldScene.cpp
+bool HelloWorld::init(){
+	//**************
+	//创建一个文本输入，教程里是LabelTTF，可是使用监听不会变化。。。
+		auto label = TextFieldTTF::create("duanhaoran","Times New Roman",30);
+		label->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+		this->addChild(label);
+	//创建监听
+		auto listener = EventListenerTouchOneByOne::create();
+		listener->onTouchBegan = [label](Touch *t,Event *e){
+			if(label->getBoundingBox().containsPoint(t->getLocation()))
+			{
+			//测试
+				//log("<<<<<<<<");
+				//让label在2秒内到达(100，100)位置	
+				//label->runAction(MoveTo::create(2,Point(100,100)));
+				//让label在2秒内移动(-10,-10)单位
+				label->runAction(MoveBy::create(2,Point(-10,-10)));
+				//动作反转
+				//	label->runAction(MoveBy::create(2,Point(-10,-10))->reverse());
+				//动作永久重复
+				//label->runAction(RepeatForever::create(MoveBy::create(2,Point(10,-10))->reverse()));
+				//动作混合
+				//label->runAction(Spawn::create(RotateBy::create(3,45),MoveBy::create(1,Point(200,-200)),NULL));
+				//动作序列
+				//label->runAction(Sequence::create(RotateBy::create(3,45),MoveBy::create(1,Point(200,-200)),NULL));
+				//动作侦听
+				/*label->runAction(Sequence::create(
+										RotateBy::create(3,45),
+										MoveBy::create(1,Point(200,-200)),
+										CallFunc::create([](){
+											MessageBox("Action complete","complete");					
+				
+					}),NULL));*/
+			}
+			return false;
+		};
+	//添加时间监听器
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,label);
+		
+	}

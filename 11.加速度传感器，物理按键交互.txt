@@ -1,0 +1,34 @@
+//加速度传感器
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+		//开启加速功能
+		Device::setAccelerometerEnabled(true);
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(
+		//侦听加速度
+		EventListenerAcceleration::create([](Acceleration * t,Event * e){
+			//输出，在手机编译器上能查看
+			log("x:%g,y:%g,z:%g",t->x,t->y,t->z);
+			}),this);
+
+}
+
+
+//物理按键的交互
+		//监听一个键盘按键
+		auto listener = EventListenerKeyboard::create();
+		//监听到释放按键，事件参数是按键代码，事件
+		listener->onKeyReleased = [](EventKeyboard::KeyCode code,Event* e){
+			//输出按键代码
+			log("key code : %d ",code);
+			switch (code)
+			{
+			//判断，如果是返回键，那么执行退出
+			case EventKeyboard::KeyCode::KEY_BACKSPACE:
+				Director::getInstance()->end();
+			default:
+				break;
+			}
+		};
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,this);

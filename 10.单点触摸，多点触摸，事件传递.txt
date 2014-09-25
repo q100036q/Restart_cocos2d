@@ -1,0 +1,79 @@
+//单点触摸
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+	//之前测试LabelTTF都不行，害我每次都替换成TextFieldTTF，这次却成功了。。。撤回去看，目前得出结论，labelTTF使用getBoundBox判断范围然后测试会失效，而TextFieldTTF则不会
+	auto label = LabelTTF::create("Chick me","Times New Roman",30);
+		label->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+		addChild(label);
+		//OneByOne单点触摸
+		auto listener = EventListenerTouchOneByOne::create();
+		listener->onTouchBegan = [label](Touch *t,Event *e)
+		{
+		//这里的e->getCurrentTarget()其实就是以前写的label，还有就是，labelTTF还是不能用，最终我只好该成TextFieldTTF才行
+			if(e->getCurrentTarget()->getBoundingBox().containsPoint(t->getLocation())){
+				{//测试
+				log("onTouchBegan");
+				}
+
+			return false;
+		};
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,label);
+}
+
+//事件传递
+
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+TextFieldTTF *label = TextFieldTTF::textFieldWithPlaceHolder("Chick me","Times New Roman",30);
+		label->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+		addChild(label);
+
+		auto listener = EventListenerTouchOneByOne::create();
+		listener->onTouchBegan = [label](Touch *t,Event *e)
+		{
+			if(e->getCurrentTarget()->getBoundingBox().containsPoint(t->getLocation())){
+				log("onTouchBegan");
+			}
+			//若这里是false，那么下面的两个都不会被执行，这就是事件传递
+			return true;
+		};
+		listener->onTouchMoved = [](Touch *t,Event *e)
+		{
+			log("onTouchMoved");
+		};
+		listener->onTouchEnded = [](Touch *t,Event *e)
+		{
+			log("onTouchEnd");
+		};
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,label);
+}
+
+//多点触摸
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+		auto listener = EventListenerTouchAllAtOnce::create();
+		listener->onTouchesBegan = [](Touch *t,Event *e)
+		{
+				log("onTouchesBegan");
+			return true;
+		};
+		listener->onTouchesMoved = [](std::vector<Touch*> t,Event *e)
+		{
+		//这里t.size()是计算触摸点的，手机端能看出来，在如果是ios平台,要在 AppController.mm 中加入
+		//开启多点触控.. 默认是关闭的。
+		//[__glView setMultipleTouchEnabled:YES];
+		//如果是android就不用，因为默认是开启的...
+			log("onTouchesMoved,the count is %ld",t.size());
+		};
+		listener->onTouchEndesed = [](Touch *t,Event *e)
+		{
+			log("onTouchesEnd");
+		};
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,this);
+	｝
