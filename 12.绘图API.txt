@@ -1,0 +1,24 @@
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+		//cocos2dx3.0以后不用重写Node的draw方法，直接使用DrawNode就能创建绘图
+		auto r = DrawNode::create();
+		addChild(r);
+		//为了创建多边形，使用向量数组包含四个点坐标
+		Vec2 vc[4]={Vec2(100,100),Vec2(200,100),Vec2(200,300),Vec2(100,300)};
+		//创建多边形的函数参数分别是，坐标，填充颜色，边框宽度，边框颜色
+		r->drawPolygon(vc,4, Color4F::BLUE, 0, Color4F::RED);
+		//画圆,四个参数分别是，圆心位置，半径，填充颜色，画点也能这样用，半径设为1就行
+		/*r->drawDot(Vec2(100,100),50,Color4F::GREEN);*/
+		//画三角形，参数是三个点的坐标，填充颜色
+		/*r->drawTriangle(Vec2(30,30),Vec2(30,90),Vec2(90,30),Color4F::GRAY);*/
+		//画线段，参数是起始点坐标，结尾坐标，线段宽度，颜色
+		/*r->drawSegment(Vec2(100,100),Vec2(200,200),1,Color4F::YELLOW);*/
+		//画点，还能这么用，用点画一个正方形
+		/*for(int x =50;x<100;x++)
+			for(int y = 50;y<100;y++)
+			{
+				r->drawDot(Vec2(x,y),1,Color4F::MAGENTA);
+			}*/
+}

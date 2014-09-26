@@ -1,0 +1,116 @@
+//首选项数据读写
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+
+		//设置一个数据，写入一个文件，下次在打开还会显示，这里存储一个字符串放入Key
+		//UserDefault::getInstance()->setStringForKey("data1","Hello DHR");
+		//写一个输出，给一个默认值进行对比
+		log("%s",UserDefault::getInstance()->getStringForKey("data1","Hello World").c_str());
+}
+
+//文件读写
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+		//auto fu = FileUtils::getInstance();
+		//输出用户文档目录,一般都会放在工作目录的文档文件下
+		//log("%s",fu->getWritablePath().c_str());
+		
+		
+		////在文档文件下，打开一个文件
+		//FILE* f = fopen(fu->fullPathFromRelativeFile("data.txt",fu->getWritablePath()).c_str(),"w");  
+		////向文件写入
+		//fprintf(f,"yooooooooo,ni hao!");
+		//关闭文件
+		//fclose(f);
+		
+		//读取文件
+		/*auto d = fu->getDataFromFile(fu->fullPathFromRelativeFile("data.txt",fu->getWritablePath()));
+		//输出所有内容
+		log("%s",d.getBytes());*/
+
+}
+
+//plist文件读取
+/*data.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>arr</key>
+	<array>
+		<string>Hello</string>
+		<integer>10</integer>
+	</array>
+	<key>name</key>
+	<string>jikexueyuan</string>
+</dict>
+</plist>
+*/
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+		FileUtils * fu = FileUtils::getInstance();
+		//如果根节点是dict，那么就读成map（使用getValueMapFromFile），如果是array那么读成vector
+		ValueMap vm = fu->getValueMapFromFile("data.plist");
+		//读取plist文件的“name”属性，这里的vm["name"]可以用vm.at("name")代替
+		log("%s",vm["name"].asString().c_str());
+}
+
+//xml数据操作
+/*data.xml
+<data>
+    <p name="ZhangSan" age="10"/>
+    <p name="LiSi" age="11"/>
+</data>
+*/
+HelloWorldScene.cpp
+#include <tinyxml2\tinyxml2.h>
+bool HelloWorld::init()
+{
+//***********
+		//创建一个文档，用来解析xml
+		auto doc = new tinyxml2::XMLDocument();
+		//解析字符串，从xml中取出字符串来解析
+		doc->Parse(FileUtils::getInstance()->getStringFromFile("data.xml").c_str());
+		//取出根节点，来查找子对象
+		auto root = doc->RootElement();
+		//遍历所有子对象
+		for(auto e = root->FirstChildElement();e;e=e->NextSiblingElement())
+		{
+			std::string str;
+			//遍历所有的属性
+			for(auto attr = e->FirstAttribute();attr;attr=attr->Next())
+			{
+				str+=attr->Name();
+				str+=":";
+				str+=attr->Value();
+				str+=",";
+			}
+			log("%s",str.c_str());
+		}
+
+}
+
+
+//json数据操作
+/*data.json
+[{"name":"ZhangSan","age":20},{"name":"LiSi","age":19}]
+*/
+HelloWorldScene.cpp
+#include <json\document.h>
+bool HelloWorld::init()
+{
+//***********
+		//rapidjson工具解析json文件
+		rapidjson::Document d;
+		//0是默认的解析方式，传入字符串格式
+		d.Parse<0>(FileUtils::getInstance()->getStringFromFile("data.json").c_str());
+		int index =0;
+		//访问第一个元素，输出name属性
+		log("%s",(d[index]["name"]).GetString());
+}

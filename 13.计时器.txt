@@ -1,0 +1,41 @@
+//计时器
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+
+	label = LabelTTF::create("duanhaoran","Times New Roman",30);
+		addChild(label);
+		//开启计时器
+		//scheduleUpdate();
+		//参数是函数指针，使用宏定义，时间间隔
+		schedule(schedule_selector(HelloWorld::timerHandler),1);
+}
+
+void HelloWorld::timerHandler(float dt)
+{
+	//测试
+	log("<<<<<<<");
+}
+
+void HelloWorld::update(float dt)
+{
+	label->setPosition(label->getPosition()+Point(1,1));
+	//给计时器关闭功能
+	if(label->getPositionX() > 500){
+		//关闭计时器
+		unscheduleUpdate();
+	}
+}
+HelloWorldScene.h
+class HelloWorld : public cocos2d::Layer
+{
+//******************
+//每一帧执行一次，两个帧的时间间隔
+	virtual void update(float dt);
+	//以上方法无法调整时间间隔，所以设计一个新的方法手动调节
+	void timerHandler(float dt);
+	//设置为全局变量，因为后面其他函数会用到
+private:
+	cocos2d::LabelTTF* label;
+}
