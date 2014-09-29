@@ -1,0 +1,29 @@
+﻿//创建物理世界
+HelloWorldScene.h
+#include <BOX2D/Box2D.h>
+class HelloWorld : public cocos2d::Layer
+{
+	//***********
+	//定义一个box2d对象
+	private:
+		b2World *world;
+	public:
+		virtual void updat(float dt);
+}
+HelloWorldScene.c
+bool HelloWorld::init()
+{
+//***********
+	//实现world，参数是b2Vec类型，x方向加速度为0，y方向为向下的10，即-10
+	world = new b2World(b2Vec(0,-10));
+
+}
+//updat方法每隔一帧执行一次，刚好事件也打算每隔一帧计算每个元素处在的位置
+void HelloWorld::update(float dt)
+{
+//一步步模拟世界，Step第一个参数是当前一步与最后一步时间差，刚好是update传入的当前一帧与上一帧的时间差一样
+//第二个参数是速度迭代，物理事件模拟时难免出现误差，用速度迭代重新计算来避免误差，速度越多越精确，也越耗资源，官方推荐是8，比较准确，后面参数是位置迭代，官方建议3
+	world->Step(dt,8,3);
+}
+
+
