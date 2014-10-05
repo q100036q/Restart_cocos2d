@@ -10,11 +10,12 @@ class HelloWorld : public cocos2d::Layer
 	public:
 		virtual void updat(float dt);
 }
-HelloWorldScene.c
+HelloWorldScene.cpp
 bool HelloWorld::init()
 {
 //***********
 	//实现world，参数是b2Vec类型，x方向加速度为0，y方向为向下的10，即-10
+	//后面出了各种错误就在于我把这段注释了，导致堆栈错误
 	world = new b2World(b2Vec(0,-10));
 
 }

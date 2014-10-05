@@ -1,0 +1,73 @@
+//C和Java交互
+1.打开安装好环境的ADT,把SDK和NDK路径写好
+
+2.在java编程环境下右键，新建安卓文件
+
+3.右键文件名，选择android tools下的Add Native Support，生成jni文件夹
+
+4.在src下的包右键，新建一个类文件（取名为CBaoZi类），在类的文件下方法前加一个native，如下
+
+package com.duanhaoran.baozi;
+
+public class CBaoZi {
+//实例方法
+	public native String getStr();
+//静态方法	
+	public static native int getNum();
+}
+
+
+5.在cmd中切换到文件工程路径，cd到bin目录下的classes文件夹下，使用javah -jni [类的路径][类名]来主动生成.h文件
+这里生成失败，显示找不到类文件，使用以下代码可以解决：
+
+javah -classpath . -jni [类的路径][类名]
+还有一种，可以省略下一步：
+javah -d ../../jni/ -classpath . -jni [类的路径][类名]
+
+6.将生成的com_duanhaoran_baozi_CBaoZi.h头文件拷贝到jni目录下
+
+7.打开该文件，发现参数不一样
+第一个参数是jni的环境，这是一样的
+第二个参数，实例方法参数指的是当前参数的实例，即this,而静态方法的jclass指的是类的定义，即类
+JNIEXPORT jstring JNICALL Java_com_duanhaoran_baozi_CBaoZi_getStr
+  (JNIEnv *, jobject);
+
+JNIEXPORT jint JNICALL Java_com_duanhaoran_baozi_CBaoZi_getNum
+  (JNIEnv *, jclass);
+8.将它们拷贝到自己生成的cpp文件内，除去方法的JNIEXPORT与JNICALL前缀
+9.完成这两个方法的定义：
+ #include <jni.h>
+#include "com_duanhaoran_baozi_CBaoZi.h"
+
+ jstring  Java_com_duanhaoran_baozi_CBaoZi_getStr
+  (JNIEnv *env, jobject thiz){
+  //创建java对象肯定要使用env来创建
+	return env->NewStringUTF("Hello Java");//这里报错了，说env不存在，还没解决
+}
+
+jint  Java_com_duanhaoran_baozi_CBaoZi_getNum
+  (JNIEnv *, jclass clazz){
+	return 8;
+}
+10.在类里面加载本机库，写在静态模块，这样在类第一次使用时执行，重复使用的话，不会再执行
+package com.duanhaoran.baozi;
+
+public class CBaoZi {
+	public native String getStr();
+	
+	public static native int getNum();
+	
+	static{
+		System.loadLibrary("BaoZi");
+	}
+}
+11.在MainActivity里实现方法，来看看是否输出正确
+public class MainActivity extends ActionBarActivity {
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		//*******
+		CBaoZi h = new CBaoZi();
+		System.out.println(h.getStr());
+	}
+

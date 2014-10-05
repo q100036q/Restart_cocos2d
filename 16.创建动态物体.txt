@@ -1,0 +1,78 @@
+//创建动态物体
+AppDelegate.cpp
+bool AppDelegate::applicationDidFinishLaunching() {
+//***********
+//设置屏幕最高处和最右边
+glview->setDesignResolutionSize(800,600,ResolutionPolicy::SHOW_ALL);
+}
+
+HelloWorldScene.h
+//设置世界比例
+#define RADIO 80.0f
+class HelloWorld : public cocos2d::Layer
+{
+//********
+public:
+	//初始化一个矩形
+	void addRect();
+}
+
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+	//后面出了各种错误就在于我把这段注释了，导致堆栈错误，就这个原因，卡了我一个礼拜
+	//创建了一个物理世界，加速度向下
+	world = new b2World(b2Vec(0,-10));
+	addRect();
+}	
+void HelloWorld::addRect()
+{
+	//config box2d
+	//声明物体定义，配置相关参数
+	b2BodyDef def;
+	//设置物体位置，box2d物理世界使用的单位是米，所以高度最高为600/80米，所以这里第二个参数使用了5而不是10
+	def.position = b2Vec2(3,5);
+	//指明物体类型，这里是动态物体
+	def.type = b2_dynamicBody;
+	//创建一个物体，传入的参数指的是物体的定义
+	b2Body* body = world->CreateBody(&def);
+
+	//config cocos shape
+	//绑定一个图形来看，创建一个Sprite对象
+	auto s = Sprite::create();
+	//初始化矩形
+	s->setTextureRect(Rect(0,0,80,80));
+	addChild(s);
+	//配置图形的位置
+	//setPosition(Point(def.position.x*RADIO,def.position.y*RADIO));
+	//将图形跟body绑定
+	body->SetUserData(s);
+	
+}
+void HelloWorld::update(float dt)
+{
+//一步步模拟世界，Step第一个参数是当前一步与最后一步时间差，刚好是update传入的当前一帧与上一帧的时间差一样
+//第二个参数是速度迭代，物理事件模拟时难免出现误差，用速度迭代重新计算来避免误差，速度越多越精确，也越耗资源，官方推荐是8，比较准确，后面参数是位置迭代，官方建议3
+	world->Step(dt,8,3);
+	//定义一个Sprite接收矩形
+	Sprite *s;
+	//用for循环对所有子集对象进行遍历
+	for(b2Body *b = world->GetBodyList();b;b=b->GetNext())
+	{
+		//因为只定义了一个动态物体，这里直接用判断
+		if(b->GetType()==b2_dynamicBody)
+		{
+			//获取y的位置
+			//log("%f",b->GetPosition().y);
+			//如果有值，即获取到了Sprite
+			if(b->GetUserData())
+			{
+				s = (Sprite*)b->GetUserData();
+				//配置图形同步
+				s->setPosition(Point(b->GetPosition().x*RADIO,b->GetPosition().y*RADIO));
+			}
+		}
+	}
+}
+

@@ -1,0 +1,78 @@
+//创建静态物体
+
+HelloWorldScene.h
+class HelloWorld : public cocos2d::Layer
+{
+//********
+public:
+	//初始化一个地板
+	void addGround();
+private：
+	//用一个全局变量表示地板（全局的用途在后面碰撞检测，这里可以不用写全局）
+	b2Body *groundBody;
+}
+
+
+HelloWorldScene.cpp
+bool HelloWorld::init()
+{
+//***********
+	//后面出了各种错误就在于我把这段注释了，导致堆栈错误，就这个原因，卡了我一个礼拜
+	//创建了一个物理世界，加速度向下
+	world = new b2World(b2Vec(0,-10));
+	addRect();
+	addGround();
+}	
+
+void HelloWorld::addRect()
+{
+	//config box2d
+	b2BodyDef def;
+	def.position = b2Vec2(3,5);
+	def.type = b2_dynamicBody;
+	b2Body* body = world->CreateBody(&def);
+
+	b2PolygonShape shape;
+	//设置矩形边为1米
+	shape.SetAsBox(0.5,0.5);
+	//指定物体的身躯，同下面的地板，这里不再解释
+	b2FixtureDef fixtureDef;
+	fixtureDef.density = 1;
+	fixtureDef.friction = 0.3;
+	fixtureDef.shape = &shape;
+	//config cocos shape
+	auto s = Sprite::create();
+	//根据半宽来算，用0.5乘2再乘以系数来配置矩形
+	s->setTextureRect(Rect(0,0,0.5*2*RADIO,0.5*2*RADIO));
+	addChild(s);
+
+	//setPosition(Point(def.position.x*RADIO,def.position.y*RADIO));
+	body->SetUserData(s);
+	
+}
+
+void HelloWorld::addGround()
+{
+	//声明物体定义，配置相关参数
+	b2BodyDef def;
+	//设置物体位置
+	def.position = b2Vec2(400/RADIO,0);
+	//指明物体类型，这里是静态物体
+	def.type = b2_staticBody;
+	//创建一个物体
+	groundBody = world->CreateBody(&def);
+	//声明图形区域
+	b2PolygonShape groundShape;
+	//设置图形区域的半宽半高，以此为中心，所以为了铺满整个横轴，用了400/RADIO，高就指定为1
+	groundShape.SetAsBox(400/RADIO,0.5);
+	//声明一个身躯
+	b2FixtureDef fixureDef;
+	//定义密度
+	fixureDef.density = 1;
+	//定义摩擦系数
+	fixureDef.friction = 0.3;
+	//指定图形区域
+	fixureDef.shape = &groundShape; 
+	//创建一个身躯
+	groundBody->CreateFixture(&fixureDef);
+}
