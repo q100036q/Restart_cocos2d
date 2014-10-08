@@ -1,0 +1,82 @@
+//C和Android连接调用java的API
+HelloWorldScene.cpp
+//将用到jni,这里导入头文件，但是会报错找不到jni.h，这里我把jdk文件下的include文件夹作为包含文件导入到vs中，解决报错但是有问题，在下面
+#include <platform\android\jni\JniHelper.h>
+bool HelloWorld::init()
+{
+	//****************
+	//新建一个文本，设置一个监听
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	auto label = TextFieldTTF::textFieldWithPlaceHolder("Show Android Toast","Times New Roman",32);
+	addChild(label);
+	label->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+
+	auto listener = EventListenerTouchOneByOne::create();
+	listener->onTouchBegan = [](Touch *t,Event *e){
+		if(e->getCurrentTarget()->boundingBox().containsPoint(t->getLocation()))
+		{
+				//测试是否成功
+				log("Show Toast");
+				//还是会报错，无法解析的外部符号，但是这里没有关系，在ADT中可以编译成APK执行到手机
+				JniMethodInfo minfo;
+				//获取到ADT中静态方法的信息，第二个参数是类的名字，这里用路径表示，即ADT中类的路径，第三个参数是方法的名字
+				//第四个参数是方法的签名(因为方法可以被重载，所以需要区分)，这里小括号内是传入的参数，因为参数是String类型，所以第一个用Ljava/lang/String,括号外是返回值是void类型，这里直接用V表示
+				JniHelper::getStaticMethodInfo(minfo,"org/cocos2dx/cpp/Tools","showToast","(Ljava/lang/String;)V");
+				//根据方法的相关信息呼叫方法，传过去一个参数，这样就执行了java语言的方法了
+				//获取Env对象，执行它的静态void方法，第一个参数是Class对象，这里用minfo.classTD表示，第二个参数是minfo.methodID,第三个是传过去的参数用一个字符串表示
+				JniHelper::getEnv()->CallStaticVoidMethod(minfo.classID,minfo.methodID,JniHelper::getEnv()->NewStringUTF("Hello Java"));
+		}
+		return false;
+	};
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener,label);
+}
+//导入到ADT中，把所有配置完成后，在src下包中新建一个Tools类
+Tools.java
+package org.cocos2dx.cpp;
+//导入各种包
+import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.widget.Toast;
+
+public class Tools {
+	//初始化context，从外界传入，并缓存
+	public static void init(Context context){
+		Tools.context = context;
+	}
+	//设置一个静态方法显示Toast
+	public static void showToast(String msg){
+		//此时执行的不是主线程，android不允许访问主线程，所以必须用Handler，下面这行不能直接用
+		//Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+		Message m = new Message();
+		m.obj = msg;
+		handler.sendMessage(m);
+	}
+	private static final Handler handler = new Handler(){
+		//重写一个方法，把消息传给主线程
+		public void handleMessage(android.os.Message msg){
+			//展示Toast
+			Toast.makeText(context, (String)msg.obj, Toast.LENGTH_SHORT).show();
+		};
+	};
+	//如果想呈现一个Toast的话，在当前类里保留一个context对象
+	private static Context context =null;
+}
+
+//在这里设置一个启动初始化
+AppActivity.java
+
+package org.cocos2dx.cpp;
+
+import org.cocos2dx.lib.Cocos2dxActivity;
+
+import android.os.Bundle;
+
+public class AppActivity extends Cocos2dxActivity {
+//下面两行是自己加的初始化，必须在OnCreate方法里才能用
+	protected void onCreate(final Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		Tools.init(this);
+	}
+}
